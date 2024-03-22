@@ -39,7 +39,7 @@ app.listen(port, (error) => {
 app.post("/uploadimage", (req, res) => {
   res.json({
     success: 1,
-    image_url: `https://quickshopp-backend.onrender.com/images/${req.file.filename}`,
+    image_url: `https://quickshop-backend.vercel.app/images/${req.file.filename}`,
   });
 });
 
