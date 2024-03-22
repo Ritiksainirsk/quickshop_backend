@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const multer = require("multer");
 const path = require("path");
 require("dotenv").config()
 const app = express();
@@ -23,20 +24,20 @@ app.listen(port, (error) => {
 });
 
 // image Storage Engine
-// const upload = multer({
-//   storage: multer.diskStorage({
-//     destination: "./upload/images",
-//     filename: (req, file, cb) => {
-//       return cb(
-//         null,
-//         `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-//       );
-//     },
-//   }),
-// });
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: "./upload/images",
+    filename: (req, file, cb) => {
+      return cb(
+        null,
+        `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+      );
+    },
+  }),
+});
 
-// app.use("/images", express.static("upload/images"));
-app.post("/uploadimage", (req, res) => {
+app.use("/images",  express.static("upload/images"));
+app.post("/uploadimage",upload.single("product"), (req, res) => {
   res.json({
     success: 1,
     image_url: `https://quickshop-backend.vercel.app/images/${req.file.filename}`,
