@@ -4,10 +4,9 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
-require("dotenv").config()
+require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 4000;
-
 
 app.use(express.json());
 app.use(cors());
@@ -36,12 +35,22 @@ const upload = multer({
   }),
 });
 
-app.use("/images",  express.static("upload/images"));
-app.post("/uploadimage",upload.single("product"), (req, res) => {
-  res.json({
-    success: 1,
-    image_url: `https://quickshop-backend.vercel.app/images/${req.file.filename}`,
-  });
+//Cloudinary
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: "dqj6u01e9",
+  api_key: "488967648253877",
+  api_secret: "JD3fOCaUKyoiQXS4juSnOGw3BsM",
+});
+
+app.use("/images", express.static("upload/images"));
+app.post("/uploadimage", upload.single("product"), async (req, res) => {
+    const upload = await cloudinary.uploader.upload(req.file.path);
+
+    res.json({
+      success: 1,
+      image_url: upload.url,
+    });
 });
 
 // AddProduct
@@ -207,7 +216,7 @@ app.post("/addtocart", fetchUser, async (req, res) => {
 });
 
 // creating end point for deleting cart items
-app.post("/removetocart",fetchUser, async (req, res) => {
+app.post("/removetocart", fetchUser, async (req, res) => {
   const userData = await User.findOne({ _id: req.user.id });
   if (userData.cartData[req.body.itemId]) {
     userData.cartData[req.body.itemId] -= 1;
@@ -219,9 +228,8 @@ app.post("/removetocart",fetchUser, async (req, res) => {
   }
 });
 
-
-// creating end point for getcart data 
-app.get('/getcart',fetchUser,async(req,res)=>{
-  let userData = await User.findOne({_id:req.user.id})
-  res.send(userData.cartData)
-})
+// creating end point for getcart data
+app.get("/getcart", fetchUser, async (req, res) => {
+  let userData = await User.findOne({ _id: req.user.id });
+  res.send(userData.cartData);
+});
